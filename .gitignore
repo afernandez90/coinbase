@@ -1,0 +1,8 @@
+# Bazel directories.
+/bazel-*
+/bazel-coinbase/
+/bazel-out/
+/bazel-testlogs/
+
+# CLion Bazel directory.
+/.clwb/
