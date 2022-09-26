@@ -1,0 +1,17 @@
+cc_binary(
+    name = "list_all_products",
+    srcs = ["list_all_products.cpp"],
+    deps = [
+        "//coinbase:client",
+        "@com_github_google_glog//:glog",
+    ],
+)
+
+cc_binary(
+    name = "read_feed",
+    srcs = ["read_feed.cpp"],
+    deps = [
+        "//coinbase:client",
+        "@com_github_google_glog//:glog",
+    ],
+)
