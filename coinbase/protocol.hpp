@@ -1,9 +1,6 @@
 #pragma once
 
-#include <rapidjson/document.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
-#include <string_view>
+#include <string>
 #include <vector>
 
 // Coinbase API protocol implementation.

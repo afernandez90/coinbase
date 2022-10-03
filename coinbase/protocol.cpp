@@ -1,19 +1,40 @@
 #include "coinbase/protocol.hpp"
 
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include <sstream>
+#include <unordered_map>
 
 namespace coinbase::protocol {
 
 namespace {
 
-template <class T>
-void field_check(const T &value, const std::string &field_name) {
-  if (!value.HasMember(field_name.c_str())) {
+// Keys and values in the JSON response of the /products target.
+enum class product_key { id, status };
+const std::unordered_map<product_key, std::string_view> PRODUCT_KEYS{
+    {product_key::id, "id"}, {product_key::status, "status"}};
+constexpr std::string_view ONLINE_STATUS_VALUE = "online";
+
+template <class T> std::string safe_get(const T &entry, product_key key) {
+  auto key_string = PRODUCT_KEYS.at(key).data();
+
+  if (!entry.HasMember(key_string)) {
     std::ostringstream error;
-    error << "Expected value to have member \"" << field_name
+    error << "Expected value to have member \"" << key_string
           << "\" but it didn't.";
     throw std::runtime_error(error.str());
   }
+
+  auto &value = entry[key_string];
+
+  if (!value.IsString()) {
+    std::ostringstream error;
+    error << "Expected value of \"" << key_string << "\" to be of type string.";
+    throw std::runtime_error(error.str());
+  }
+
+  return value.GetString();
 }
 
 } // namespace
@@ -36,10 +57,8 @@ std::vector<std::string> extract_online_product_ids(const std::string &data) {
   result.reserve(array.Size());
 
   for (auto &value : array) {
-    field_check(value, "status");
-    if (value["status"] == "online") {
-      field_check(value, "id");
-      result.emplace_back(value["id"].GetString());
+    if (safe_get(value, product_key::status) == ONLINE_STATUS_VALUE) {
+      result.emplace_back(safe_get(value, product_key::id));
     }
   }
   return result;
