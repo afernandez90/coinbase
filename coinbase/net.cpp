@@ -94,16 +94,6 @@ std::string execute(http_get_request request) {
 
 websocket_tls_client::websocket_tls_client(std::string_view peer_name)
     : ssl_context_(make_boost_ssl_context()), wss_(io_context_, ssl_context_) {
-  // Initialise websocket options.
-  wss_.set_option(
-      websocket::stream_base::timeout::suggested(beast::role_type::client));
-
-  // The timeouts on a websocket stream are incompatible with the timeouts
-  // used in the tcp_stream. When constructing a websocket stream from a tcp
-  // stream that has timeouts enabled, the timeout should be disabled first
-  // before constructing the websocket stream.
-  beast::get_lowest_layer(wss_).expires_never();
-
   // Initialise TCP and TLS layers.
   auto endpoint = ssl_init(wss_.next_layer(), peer_name);
   // Initialise websocket layer.
