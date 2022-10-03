@@ -60,8 +60,10 @@ make_subscribe_message(const std::vector<std::string> &product_ids) {
   writer.EndArray();
   writer.Key("channels");
   writer.StartArray();
+  writer.String("heartbeat");
   writer.String("level2");
-  writer.String("auctionfeed");
+  writer.String("ticker");
+  writer.String("matches");
   writer.EndArray();
   writer.EndObject();
   return std::string(buffer.GetString(), buffer.GetSize());
