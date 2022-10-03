@@ -20,7 +20,7 @@ class websocket_client {
 public:
   virtual ~websocket_client() = default;
 
-  virtual void send(const std::string&) = 0;
+  virtual void send(const std::string &) = 0;
 
   // Result is valid as long as the instance is alive.
   virtual std::string_view receive() = 0;
@@ -30,7 +30,7 @@ public:
 class websocket_tls_client : public websocket_client {
 public:
   websocket_tls_client(std::string_view peer_name);
-  void send(const std::string&) override;
+  void send(const std::string &) override;
   std::string_view receive() override;
 
 private:

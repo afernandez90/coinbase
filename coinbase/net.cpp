@@ -1,5 +1,7 @@
 #include "coinbase/net.hpp"
 
+#include <boost/beast/core/role.hpp>
+#include <boost/beast/websocket/stream_base.hpp>
 #include <boost/format.hpp>
 #include <glog/logging.h>
 
@@ -15,8 +17,6 @@ namespace {
 
 // 10 for HTTP 1.0, 11 for HTTP 1.1.
 const int BOOST_HTTP_VERSION = 11;
-// Size of the read buffer for HTTP requests.
-const size_t HTTP_READ_BUFFER_BYTES = 4096;
 
 decltype(auto) lookup_https_service(std::string_view name) {
   boost::asio::io_context io_context;
@@ -82,6 +82,11 @@ std::string execute(http_get_request request) {
 
   VLOG(1) << request.host_name << " -> Response header:" << std::endl
           << response.base();
+
+  if (response.body().empty()) {
+    throw std::runtime_error("Unexpected empty response body.");
+  }
+
   VLOG(2) << "Response body (might be truncated): " << std::endl
           << response.body();
   return response.body();
@@ -89,6 +94,16 @@ std::string execute(http_get_request request) {
 
 websocket_tls_client::websocket_tls_client(std::string_view peer_name)
     : ssl_context_(make_boost_ssl_context()), wss_(io_context_, ssl_context_) {
+  // Initialise websocket options.
+  wss_.set_option(
+      websocket::stream_base::timeout::suggested(beast::role_type::client));
+
+  // The timeouts on a websocket stream are incompatible with the timeouts
+  // used in the tcp_stream. When constructing a websocket stream from a tcp
+  // stream that has timeouts enabled, the timeout should be disabled first
+  // before constructing the websocket stream.
+  beast::get_lowest_layer(wss_).expires_never();
+
   // Initialise TCP and TLS layers.
   auto endpoint = ssl_init(wss_.next_layer(), peer_name);
   // Initialise websocket layer.
