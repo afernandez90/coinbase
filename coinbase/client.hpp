@@ -31,7 +31,7 @@ class client {
 public:
   virtual ~client() = default;
 
-  // Result is valid for as long this instance is alive.
+  // List all online products (available in feed).
   virtual std::vector<std::string> products() = 0;
 
   // Make a new feed stream for a set of products.
@@ -68,4 +68,4 @@ private:
   tls_client_config config_;
 };
 
-} // namespace coinbase::client
+} // namespace coinbase

@@ -11,7 +11,7 @@ std::vector<std::string> tls_client::products() {
   net::http_get_request request;
   request.host_name = REST_API;
   request.target = REST_API_PRODUCTS_TARGET;
-  return protocol::extract_product_ids(
+  return protocol::extract_online_product_ids(
       config_.api_executor(std::move(request)));
 }
 
@@ -27,4 +27,4 @@ wss_feed::wss_feed(std::unique_ptr<net::websocket_client> ws_client)
 
 std::string_view wss_feed::next() { return ws_client_->receive(); }
 
-} // namespace coinbase::client
+} // namespace coinbase
